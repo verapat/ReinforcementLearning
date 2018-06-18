@@ -8,6 +8,9 @@ from keras.optimizers import Adam
 from collections import deque
 
 class DQN:
+    """
+        this is test github
+    """
     def __init__(self, env):
         self.env     = env
         self.memory  = deque(maxlen=2000)
