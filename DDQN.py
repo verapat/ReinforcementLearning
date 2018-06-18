@@ -7,6 +7,8 @@ from keras.optimizers import Adam
 
 from collections import deque
 
+import time
+
 class DQN:
     def __init__(self, env):
         self.env     = env
@@ -86,11 +88,12 @@ def main():
     # steps = []
     for trial in range(trials):
         cur_state = env.reset().reshape(1,env.observation_space.shape[0])
-        env.render()
+        # env.render()
+        start_trial_time = time.time()
         for step in range(trial_len):
             action = dqn_agent.act(cur_state)
             new_state, reward, done, _ = env.step(action)
-            env.render()
+            # env.render()
 
             # reward = reward if not done else -20
             new_state = new_state.reshape(1,env.observation_space.shape[0])
@@ -101,15 +104,18 @@ def main():
 
             cur_state = new_state
             if done:
-                print("this episide: {}, this reward: {}, this epsilon: {}".format(trial, step, dqn_agent.epsilon))
+                print("this episide: {}, this reward: {}, this epsilon: {}, running time: {}"
+                .format(trial, step, dqn_agent.epsilon, time.time() - start_trial_time))
                 break
-        if step <= 199:
-            print("Failed to complete in trial {}".format(trial))
-            if trial % 10 == 0:
-                dqn_agent.save_model("trial-{}.model".format(trial))
-        else:
-            print("Completed in {} trials".format(trial))
-            dqn_agent.save_model("success.model")
+        # if step <= 199:
+        #     print("Failed to complete in trial {}".format(trial))
+        #     # if trial % 10 == 0:
+        #         # dqn_agent.save_model("trial-{}.model".format(trial))
+        # else:
+        #     print("Completed in {} trials".format(trial))
+        #     # dqn_agent.save_model("success.model")
+        #     break
+        if step > 200:
             break
 
 if __name__ == "__main__":
