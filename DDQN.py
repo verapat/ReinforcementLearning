@@ -1,7 +1,7 @@
 import gym
 import numpy as np
 import random
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout
 from keras.optimizers import Adam
 
@@ -21,7 +21,7 @@ class DQN:
 
         self.model        = self.create_model()
         self.target_model = self.create_model()
-
+        # self.load_model("success.model")
     def create_model(self):
         model   = Sequential()
         state_shape  = self.env.observation_space.shape
@@ -68,6 +68,10 @@ class DQN:
     def save_model(self, fn):
         self.model.save(fn)
 
+    def load_model(self,fn):
+        self.model = load_model(fn)
+        self.target_model = load_model(fn)
+
 def main():
     # env     = gym.make("MountainCar-v0")
     env     = gym.make("CartPole-v1")
@@ -81,13 +85,15 @@ def main():
     dqn_agent = DQN(env=env)
     # steps = []
     for trial in range(trials):
-        cur_state = env.reset().reshape(1,4)
+        cur_state = env.reset().reshape(1,env.observation_space.shape[0])
+        env.render()
         for step in range(trial_len):
             action = dqn_agent.act(cur_state)
             new_state, reward, done, _ = env.step(action)
+            env.render()
 
             # reward = reward if not done else -20
-            new_state = new_state.reshape(1,4)
+            new_state = new_state.reshape(1,env.observation_space.shape[0])
             dqn_agent.remember(cur_state, action, reward, new_state, done)
 
             dqn_agent.replay()       # internally iterates default (prediction) model
@@ -97,14 +103,14 @@ def main():
             if done:
                 print("this episide: {}, this reward: {}, this epsilon: {}".format(trial, step, dqn_agent.epsilon))
                 break
-        # if step >= 199:
-        #     print("Failed to complete in trial {}".format(trial))
-        #     if step % 10 == 0:
-        #         dqn_agent.save_model("trial-{}.model".format(trial))
-        # else:
-        #     print("Completed in {} trials".format(trial))
-        #     dqn_agent.save_model("success.model")
-        #     break
+        if step <= 199:
+            print("Failed to complete in trial {}".format(trial))
+            if trial % 10 == 0:
+                dqn_agent.save_model("trial-{}.model".format(trial))
+        else:
+            print("Completed in {} trials".format(trial))
+            dqn_agent.save_model("success.model")
+            break
 
 if __name__ == "__main__":
     main()

@@ -43,8 +43,7 @@ class ActorCritic:
 			[None, self.env.action_space.shape[0]]) # where we will feed de/dC (from critic)
 
 		actor_model_weights = self.actor_model.trainable_weights
-		self.actor_grads = tf.gradients(self.actor_model.output, actor_model_weights, map(lambda x: -x, self.actor_critic_grad)) # dC/dA (from actor)
-		# self.actor_grads = tf.gradients(self.actor_model.output, actor_model_weights, -self.actor_critic_grad) # dC/dA (from actor)
+		self.actor_grads = tf.gradients(self.actor_model.output, actor_model_weights, -self.actor_critic_grad) # dC/dA (from actor)
 		grads = zip(self.actor_grads, actor_model_weights)
 		self.optimize = tf.train.AdamOptimizer(self.learning_rate).apply_gradients(grads)
 
